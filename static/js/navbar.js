@@ -21,6 +21,21 @@ function createNavbar(currentPath = '') {
     `;
   }).join('');
 
+  // Mobile menu items
+  const mobileNavLinks = navItems.map(item => {
+    const isActive = currentPath === item.path;
+    const activeClass = isActive ? 
+      'bg-gradient-to-r from-sky-500 to-cyan-500 text-white' : 
+      'text-gray-300 hover:text-white hover:bg-slate-700/80';
+    
+    return `
+      <a href="${item.href}" class="${activeClass} px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-3">
+        <span>${item.icon}</span>
+        <span>${item.label}</span>
+      </a>
+    `;
+  }).join('');
+
   return `
     <header class="bg-slate-900/95 backdrop-blur-md shadow-2xl shadow-slate-900/50 sticky top-0 z-50 border-b border-slate-700/50">
       <div class="max-w-7xl mx-auto px-4 py-3">
@@ -34,16 +49,25 @@ function createNavbar(currentPath = '') {
             </div>
           </div>
 
-          <nav class="flex items-center gap-2">
+          <!-- Desktop Navigation -->
+          <nav class="hidden md:flex items-center gap-2">
             ${navLinks}
           </nav>
 
-          <button class="md:hidden p-2 rounded-lg bg-slate-800 text-gray-300 hover:text-white hover:bg-slate-700 transition-colors duration-200">
+          <!-- Mobile Menu Button -->
+          <button data-mobile-menu class="md:hidden p-2 rounded-lg bg-slate-800 text-gray-300 hover:text-white hover:bg-slate-700 transition-colors duration-200">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
           </button>
         </div>
+
+        <!-- Mobile Navigation -->
+        <nav data-mobile-nav class="md:hidden mt-4 pb-4 hidden">
+          <div class="flex flex-col gap-2">
+            ${mobileNavLinks}
+          </div>
+        </nav>
       </div>
 
       <div class="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-sky-500/50 to-transparent"></div>
@@ -52,36 +76,37 @@ function createNavbar(currentPath = '') {
 }
 
 function injectNavbar(currentPath = '') {
-  document.addEventListener('DOMContentLoaded', function() {
-    const navbarContainer = document.getElementById('navbar-container');
-    if (navbarContainer) {
-      navbarContainer.innerHTML = createNavbar(currentPath);
-    } else {
-      const navbar = createNavbar(currentPath);
-      document.body.insertAdjacentHTML('afterbegin', navbar);
-    }
-  });
+  const navbarContainer = document.getElementById('navbar-container');
+  if (navbarContainer) {
+    navbarContainer.innerHTML = createNavbar(currentPath);
+  } else {
+    const navbar = createNavbar(currentPath);
+    document.body.insertAdjacentHTML('afterbegin', navbar);
+  }
+  
+  // Setup mobile menu toggle after injecting navbar
+  setupMobileMenu();
 }
 
 function autoInjectNavbar() {
-  const currentPath = window.location.pathname;
-  injectNavbar(currentPath);
-}
-
-function toggleMobileMenu() {
   document.addEventListener('DOMContentLoaded', function() {
-    const mobileButton = document.querySelector('[data-mobile-menu]');
-    const mobileMenu = document.querySelector('[data-mobile-nav]');
-    
-    if (mobileButton && mobileMenu) {
-      mobileButton.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
-        mobileMenu.classList.toggle('animate-fadeIn');
-      });
-    }
+    const currentPath = window.location.pathname;
+    injectNavbar(currentPath);
   });
 }
 
+function setupMobileMenu() {
+  const mobileButton = document.querySelector('[data-mobile-menu]');
+  const mobileMenu = document.querySelector('[data-mobile-nav]');
+  
+  if (mobileButton && mobileMenu) {
+    mobileButton.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  }
+}
+
+// If running in Node.js environment
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { createNavbar, injectNavbar, autoInjectNavbar, toggleMobileMenu };
+  module.exports = { createNavbar, injectNavbar, autoInjectNavbar, setupMobileMenu };
 }
