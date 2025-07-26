@@ -442,6 +442,8 @@ def test():
     </html>
     """
 
+# VERCEL COMPATIBILITY - Pastikan ini ada untuk Vercel
+# Vercel akan mencari variable 'app' sebagai WSGI app
 if __name__ == '__main__':
     print("="*50)
     print("🎮 GameTrend Flask App Starting...")
